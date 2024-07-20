@@ -13,4 +13,4 @@ jobs:
         uses: peter-evans/fork@v3
         with:
           repo: "https://github.com/Jinnrry/PMail"  # 要 fork 的项目
-          destination: "https://github.com/makebl/PMail"  # 您的 fork 目标仓库
+          destination: "https://github.com/Jinnrry/PMail"  # 您的 fork 目标仓库
