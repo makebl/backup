@@ -1,4 +1,4 @@
-name: Backup All Branches to Specified Repository
+name: 备份所有分支到指定的仓库
 
 on:
   workflow_dispatch:  # 手动触发工作流
@@ -10,30 +10,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout source repository
+    - name: 检出源仓库
       uses: actions/checkout@v2
       with:
         repository: Jinnrry/PMail  # 替换为源仓库
         token: ${{ secrets.GH_TOKEN }}
-        fetch-depth: 0  # Fetch all branches
+        fetch-depth: 0  # 获取所有分支
 
-    - name: Setup Git
+    - name: 设置 Git
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    - name: List all branches
+    - name: 列出所有分支
       id: list-branches
       run: |
         git branch -r | grep -v '\->' | sed 's/origin\///' > branches.txt
         cat branches.txt
 
-    - name: Backup each branch
+    - name: 备份每个分支
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         BACKUP_REPO: makebl/PMail  # 替换为你的备份仓库
       run: |
         while read branch; do
           git checkout $branch
-          git push --force https://$GH_TOKEN@github.com/$BACKUP_REPO.git $branch
+          git push --force https://$GH_TOKEN@github.com/$BACKUP_REPO.git $branch:$branch
         done < branches.txt
