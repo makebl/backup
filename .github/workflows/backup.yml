@@ -1,16 +1,40 @@
-name: Fork Project
+name: Backup All Branches to Specified Repository
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # 手动触发工作流
   schedule:
-    - cron: '0 0 * * *'  # 每天 0 点运行
+    - cron: '0 0 * * *'  # 每天触发一次工作流，可以根据需要修改时间
 
 jobs:
-  fork:
+  backup:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Fork the project
-        uses: peter-evans/fork@v3
-        with:
-          repo: "https://github.com/Jinnrry/PMail"  # 要 fork 的项目
-          destination: "https://github.com/Jinnrry/PMail"  # 您的 fork 目标仓库
+    - name: Checkout PMail repository
+      uses: actions/checkout@v2
+      with:
+        repository: Jinnrry/PMail
+        token: ${{ secrets.GH_TOKEN }}
+        fetch-depth: 0  # Fetch all branches
+
+    - name: Setup Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Get all branches
+      id: get-branches
+      run: |
+        echo "::set-output name=branches::$(git for-each-ref --format='%(refname:short)' refs/heads/)"
+
+    - name: Backup each branch
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        BACKUP_REPO: makebl/PMail  # 替换为你的备份仓库
+      run: |
+        for branch in ${{ steps.get-branches.outputs.branches }}; do
+          git checkout $branch
+          NEW_BRANCH="backup-$branch"
+          git checkout -b $NEW_BRANCH
+          git push --force https://$GH_TOKEN@github.com/$BACKUP_REPO.git $NEW_BRANCH
+        done
