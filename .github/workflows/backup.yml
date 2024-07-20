@@ -26,14 +26,14 @@ jobs:
       id: list-branches
       run: |
         git branch -r | grep -v '\->' | sed 's/origin\///' > branches.txt
-        echo "::set-output name=branches::$(cat branches.txt)"
+        cat branches.txt
 
     - name: Backup each branch
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         BACKUP_REPO: makebl/PMail  # 替换为你的备份仓库
       run: |
-        for branch in $(cat branches.txt); do
+        while read branch; do
           git checkout $branch
           git push --force https://$GH_TOKEN@github.com/$BACKUP_REPO.git $branch
-        done
+        done < branches.txt
