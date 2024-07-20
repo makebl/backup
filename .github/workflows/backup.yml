@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout PMail repository
+    - name: Checkout source repository
       uses: actions/checkout@v2
       with:
-        repository: Jinnrry/PMail
+        repository: Jinnrry/PMail  # 替换为源仓库
         token: ${{ secrets.GH_TOKEN }}
         fetch-depth: 0  # Fetch all branches
 
@@ -22,19 +22,18 @@ jobs:
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-    - name: Get all branches
-      id: get-branches
+    - name: List all branches
+      id: list-branches
       run: |
-        echo "::set-output name=branches::$(git for-each-ref --format='%(refname:short)' refs/heads/)"
+        git branch -r | grep -v '\->' | sed 's/origin\///' > branches.txt
+        echo "::set-output name=branches::$(cat branches.txt)"
 
     - name: Backup each branch
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         BACKUP_REPO: makebl/PMail  # 替换为你的备份仓库
       run: |
-        for branch in ${{ steps.get-branches.outputs.branches }}; do
+        for branch in $(cat branches.txt); do
           git checkout $branch
-          NEW_BRANCH="backup-$branch"
-          git checkout -b $NEW_BRANCH
-          git push --force https://$GH_TOKEN@github.com/$BACKUP_REPO.git $NEW_BRANCH
+          git push --force https://$GH_TOKEN@github.com/$BACKUP_REPO.git $branch
         done
