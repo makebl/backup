@@ -1,39 +1,15 @@
-name: Backup Project and Releases
+name: Fork Project
 
 on:
   schedule:
     - cron: '0 0 * * *'  # 每天 0 点运行
 
 jobs:
-  backup:
+  fork:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v2
+      - name: Fork the project
+        uses: peter-evans/fork@v3
         with:
-          repository: "https://github.com/makebl/PMail"  # 要备份的项目
-          ref: '*'  # 获取所有分支
-
-      - name: Clone destination repo
-        run: |
-          git clone "https://github.com/makebl/PMail" PMail
-
-      - name: Copy source to destination
-        run: |
-          cp -r./your_project/* destination_repo/
-
-      - name: Fetch Releases
-        run: |
-          curl -L "https://github.com/makebl/releases" > releases.html
-          python parse_releases.py  # 假设您有一个名为 parse_releases.py 的脚本用于解析 Releases 页面
-
-      - name: Backup Releases
-        run: |
-          # 在此处添加根据解析结果备份 Releases 的具体逻辑
-
-      - name: Commit and push changes
-        run: |
-          cd destination_repo
-          git add.
-          git commit -m "Backup"
-          git push
+          repo: "https://github.com/Jinnrry/PMail"  # 要 fork 的项目
+          destination: "https://github.com/makebl/PMail"  # 您的 fork 目标仓库
